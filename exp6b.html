@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cake Order</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;padding:40px;display:flex;justify-content:center}
+    .card{width:420px;background:#fff;border-radius:10px;padding:22px;box-shadow:0 10px 25px rgba(0,0,0,0.06)}
+    h1{text-align:center;color:#1e6bff;margin:0 0 12px}
+    label{display:block;margin-top:10px;font-weight:700;color:#333}
+    input[type=number]{width:100%;padding:10px;border-radius:6px;border:1px solid #ddd;margin-top:6px;font-size:15px}
+    .btn{margin-top:14px;width:100%;padding:10px;border-radius:8px;border:none;background:#1e6bff;color:#fff;font-weight:800;cursor:pointer}
+    .divider{height:1px;background:#eee;margin:14px 0;border-radius:2px}
+    .bill{margin-top:12px;padding:12px;background:#f7fff7;border-radius:8px;border:1px solid #e2f3e6}
+    .bill h3{color:#117a3f;margin:6px 0}
+    .bill div{margin:6px 0;font-weight:700}
+    .price{color:#d35400}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Order Cake</h1>
+
+    <label>Rainbow Cake (Quantity) — ₹200 each</label>
+    <input type="number" id="qRainbow" min="0" step="1" placeholder="0">
+
+    <label>Chocolate Cake (Quantity) — ₹300 each</label>
+    <input type="number" id="qChocolate" min="0" step="1" placeholder="0">
+
+    <label>Red Velvet Cake (Quantity) — ₹350 each</label>
+    <input type="number" id="qRed" min="0" step="1" placeholder="0">
+
+    <label>Black Forest Cake (Quantity) — ₹250 each</label>
+    <input type="number" id="qBlack" min="0" step="1" placeholder="0">
+
+    <div class="divider"></div>
+    <button id="place" class="btn">Place Order</button>
+
+    <div class="bill" id="bill" style="display:none">
+      <h3>Purchase Order Bill!!</h3>
+      <div id="lines"></div>
+      <div class="divider"></div>
+      <div>Total Price: Rs. <span class="price" id="total">0</span></div>
+    </div>
+  </div>
+
+<script>
+$(function(){
+  const prices = { rainbow:200, chocolate:300, red:350, black:250 };
+
+  function sanitize(val){
+    if(val === "" || val === null || typeof val === "undefined") return 0;
+    if(isNaN(val)) return NaN;
+    // convert to integer
+    return Math.floor(Number(val));
+  }
+
+  // validate on change/keyup: no negatives and ensure integer
+  $("#qRainbow, #qChocolate, #qRed, #qBlack").on("change keyup", function(){
+    let v = $(this).val();
+    if(v === "") return;
+    if(isNaN(v)){
+      alert("Enter a valid number");
+      $(this).val("");
+      return;
+    }
+    let n = Math.floor(Number(v));
+    if(n < 0){
+      alert("Quantity cannot be negative");
+      $(this).val("");
+      return;
+    }
+    // set integer value
+    $(this).val(n);
+  });
+
+  $("#place").on("click", function(){
+    let a = sanitize($("#qRainbow").val());
+    let b = sanitize($("#qChocolate").val());
+    let c = sanitize($("#qRed").val());
+    let d = sanitize($("#qBlack").val());
+
+    // NaN check
+    if([a,b,c,d].some(x => isNaN(x))){
+      alert("Please enter valid numeric quantities");
+      return;
+    }
+
+    // negative was handled earlier; but double-check
+    if(a<0 || b<0 || c<0 || d<0){
+      alert("Quantities cannot be negative");
+      return;
+    }
+
+    if(a===0 && b===0 && c===0 && d===0){
+      alert("Please order at least one cake");
+      return;
+    }
+
+    let s1 = a * prices.rainbow;
+    let s2 = b * prices.chocolate;
+    let s3 = c * prices.red;
+    let s4 = d * prices.black;
+    let total = s1 + s2 + s3 + s4;
+
+    let html = "";
+    if(a>0) html += `<div>Rainbow Cake × ${a} = Rs. ${s1}</div>`;
+    if(b>0) html += `<div>Chocolate Cake × ${b} = Rs. ${s2}</div>`;
+    if(c>0) html += `<div>Red Velvet Cake × ${c} = Rs. ${s3}</div>`;
+    if(d>0) html += `<div>Black Forest Cake × ${d} = Rs. ${s4}</div>`;
+
+    $("#lines").html(html);
+    $("#total").text(total);
+    $("#bill").slideDown();
+  });
+
+});
+</script>
+</body>
+</html>
